@@ -36,11 +36,42 @@
 const URL = "https://teachablemachine.withgoogle.com/models/SCrCm4nRI/";
 let model, webcam, webcamOn = false;
 const foodInfo = {
-   "Kkanpunggi": { country: "China", calorie: 865, desc: "Spicy, garlicky fried chicken in Chinese-Korean cuisine." },
-   "TangSuyuk": { country: "China", calorie: 720, desc: "Crispy deep-fried pork dish with sweet and sour sauce." },
-   "Bulgogi": { country: "Korea", calorie: 250, desc: "Grilled marinated beef or pork, sweet and savory." },
-   "Kimchi Jjigae": { country: "Korea", calorie: 400, desc: "Spicy stew made from kimchi, pork, and vegetables." }
-   // ... 모든 음식 데이터 추가 가능
+  // 중국
+  "Dim sum": { country: "China", calorie: 360, desc: "A variety of small Chinese dishes served in steamer baskets or plates, often enjoyed as brunch with tea." },
+  "Chinese Eight Treasures": { country: "China", calorie: 293, desc: "A sweet dessert pudding made with glutinous rice and assorted dried fruits and nuts." },
+  "Dongpo Pork": { country: "China", calorie: 603, desc: "Braised pork belly cooked with soy sauce, sugar, and wine, resulting in rich and tender flavors." },
+  "Jjamppong": { country: "China", calorie: 713, desc: "Spicy mixed seafood noodle soup with vegetables, originated in China but also popular in Korea." },
+  "Kkanpunggi": { country: "China", calorie: 865, desc: "Spicy, garlicky fried chicken or shrimp, stir-fried with vegetables in Chinese-Korean cuisine." },
+  "Hot Pot": { country: "China", calorie: 485, desc: "A communal dish with meats and vegetables cooked in simmering broth at the table." },
+  "Mapo Tofu": { country: "China", calorie: 420, desc: "Sichuan dish of tofu and ground meat in a spicy, numbing chili and bean-based sauce." },
+  "Peking Duck": { country: "China", calorie: 465, desc: "Famous duck dish praised for crispy skin, tender meat, typically served with pancakes and sweet sauce." },
+  // 일본
+  "Sushi": { country: "Japan", calorie: 350, desc: "Vinegared rice combined with seafood, vegetables, or egg. Japan's most iconic dish." },
+  "Miso-soup": { country: "Japan", calorie: 50, desc: "Classic soup with fermented soybean paste, seaweed, tofu, and green onion." },
+  "Ramen": { country: "Japan", calorie: 500, desc: "Noodle soup served in meat/fish broth with slices of meat, egg, and vegetables." },
+  "Takoyaki": { country: "Japan", calorie: 400, desc: "Ball-shaped snacks with diced octopus, fried in batter, topped with sauce and bonito flakes." },
+  "Tempura": { country: "Japan", calorie: 400, desc: "Seafood or vegetables battered and deep-fried for a light, crispy texture." },
+  "Katsu Don": { country: "Japan", calorie: 540, desc: "Rice bowl with breaded pork cutlet and egg simmered in sauce." },
+  "Okonomiyaki": { country: "Japan", calorie: 410, desc: "Savory cabbage pancake with meat/seafood and sweet sauce plus mayonnaise." },
+  "Sukiyaki": { country: "Japan", calorie: 630, desc: "Hot pot of beef, tofu, and vegetables simmered in sweet soy-based broth." },
+  // 한국
+  "Bibimbap": { country: "Korea", calorie: 460, desc: "Rice dish topped with assorted vegetables, egg, and chili paste, served in a hot bowl." },
+  "Bulgogi": { country: "Korea", calorie: 250, desc: "Grilled marinated beef or pork, savory and slightly sweet." },
+  "Kimchi Jjigae": { country: "Korea", calorie: 400, desc: "Spicy stew made from kimchi, pork, and vegetables." },
+  "Samgyeopsal": { country: "Korea", calorie: 180, desc: "Thick pork belly slices grilled and eaten with sauces and vegetables." },
+  "Gimbap": { country: "Korea", calorie: 125, desc: "Seaweed rice roll filled with vegetables, egg, and meat. Korean-style sushi." },
+  "Doenjang Jjigae": { country: "Korea", calorie: 280, desc: "Hearty stew with soybean paste, tofu, and assorted vegetables." },
+  "Japchae": { country: "Korea", calorie: 220, desc: "Stir-fried glass noodles with vegetables and beef in sweet soy sauce." },
+  "Tteokbokki": { country: "Korea", calorie: 480, desc: "Chewy rice cakes in spicy gochujang sauce, often with fish cake and egg." },
+  // 태국
+  "Pad Thai": { country: "Thailand", calorie: 357, desc: "Stir-fried rice noodles with egg, shrimp/chicken, peanuts, bean sprouts, and tamarind sauce." },
+  "Tom Yum Goong": { country: "Thailand", calorie: 196, desc: "Spicy and sour shrimp soup with lemongrass, kaffir lime, and chili." },
+  "Khao Pad": { country: "Thailand", calorie: 555, desc: "Thai-style fried rice with meat or seafood, egg, and vegetables." },
+  "Som Tam": { country: "Thailand", calorie: 122, desc: "Spicy green papaya salad with chili, lime, fish sauce, peanuts, and tomatoes." },
+  "Green Curry": { country: "Thailand", calorie: 620, desc: "Spicy curry with coconut milk, green chili, meat, and vegetables." },
+  "Massaman Curry": { country: "Thailand", calorie: 530, desc: "Rich, mild curry with coconut milk, potato, peanuts, influenced by Indian spices." },
+  "Pad Kra Phao": { country: "Thailand", calorie: 410, desc: "Stir-fried meat with garlic, chili, and holy basil, topped with a fried egg." },
+  "Mango Sticky Rice": { country: "Thailand", calorie: 350, desc: "Sweet glutinous rice with coconut milk, served with ripe mango." }
 };
 tmImage.load(URL+"model.json", URL+"metadata.json").then(m=>{model=m;});
 // 파일 업로드 → 판별
