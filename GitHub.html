@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Easy Food Classifier Demo</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+  <style>
+    body { background:#f9f8ee; font-family:'Noto Sans KR',sans-serif; margin:0; }
+    #app { max-width:420px; margin:28px auto; background:#fff; border-radius:19px; box-shadow:0 3px 13px #ddd; padding:24px 14px; }
+    h2 { color:#155fa0; text-align:center; margin:8px 0 0 0; font-size:1.5em; }
+    #inputbox{ display: flex; gap:8px; justify-content: center; margin:19px 0 0; }
+    .btn{ padding:6px 14px; border-radius:8px; background:#e3f4ff; font-size:0.95em; border:1px solid #b3d7ee; cursor:pointer; }
+    .btn:active{ background:#bce2fa; }
+    #webcam-container{margin:14px 0 0 0; display:flex; justify-content:center;}
+    #previewimg{ max-width:92%; border-radius:12px; margin:15px auto 2px auto; display:block; box-shadow:0 1px 4px #ccc; }
+    .food-card { background: #ffefc7; border-radius:14px; margin:14px 0; padding:13px 16px; box-shadow:0 1px 8px #eee; font-size:1.08em; }
+    .food-card strong{ color:#c37a00; font-size:1.1em; }
+    @media(max-width:500px){ #app{padding:2vw 1vw;} }
+  </style>
+</head>
+<body>
+<div id="app">
+  <h2>Asian Food Classifier</h2>
+  <div id="inputbox">
+    <input type="file" id="file-input" accept="image/*" class="btn">
+    <button class="btn" id="webcam-btn">Use Webcam</button>
+    <button class="btn" id="stopcam-btn" style="display:none;">Stop Webcam</button>
+  </div>
+  <div id="webcam-container"></div>
+  <img id="previewimg" style="display:none;"/>
+  <div id="output"></div>
+</div>
+<script>
+const URL = "https://teachablemachine.withgoogle.com/models/SCrCm4nRI/";
+let model, webcam, webcamOn = false;
+const foodInfo = {
+   "Kkanpunggi": { country: "China", calorie: 865, desc: "Spicy, garlicky fried chicken in Chinese-Korean cuisine." },
+   "TangSuyuk": { country: "China", calorie: 720, desc: "Crispy deep-fried pork dish with sweet and sour sauce." },
+   "Bulgogi": { country: "Korea", calorie: 250, desc: "Grilled marinated beef or pork, sweet and savory." },
+   "Kimchi Jjigae": { country: "Korea", calorie: 400, desc: "Spicy stew made from kimchi, pork, and vegetables." }
+   // ... 모든 음식 데이터 추가 가능
+};
+tmImage.load(URL+"model.json", URL+"metadata.json").then(m=>{model=m;});
+// 파일 업로드 → 판별
+const finput=document.getElementById("file-input");
+finput.addEventListener("change",function(){
+  const f=this.files[0];
+  if(!f||!model) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new window.Image();
+    img.onload=async function(){
+      document.getElementById("previewimg").src=ev.target.result;
+      document.getElementById("previewimg").style.display='block';
+      showPred(img);
+    };img.src=ev.target.result;
+  }
+  reader.readAsDataURL(f);
+});
+// 웹캠
+const webcamBtn=document.getElementById("webcam-btn");
+const stopBtn=document.getElementById("stopcam-btn");
+webcamBtn.onclick=async function(){
+  if(webcamOn) return;
+  webcamOn=true;
+  webcamBtn.style.display='none';stopBtn.style.display='inline-block';
+  document.getElementById("previewimg").style.display='none';
+  webcam=new tmImage.Webcam(224,224,true); await webcam.setup(); await webcam.play();
+  document.getElementById("webcam-container").innerHTML='';
+  document.getElementById("webcam-container").appendChild(webcam.canvas);
+  webcamLoop();
+}
+stopBtn.onclick=function(){
+  webcamOn=false; if(webcam) webcam.stop();
+  document.getElementById("webcam-container").innerHTML='';
+  webcamBtn.style.display='inline-block';stopBtn.style.display='none';
+  document.getElementById("previewimg").style.display='none';
+}
+async function webcamLoop(){
+  if(!webcamOn||!model) return;
+  webcam.update(); showPred(webcam.canvas);
+  setTimeout(webcamLoop,1500);
+}
+// 예측+카드
+async function showPred(srcimg){
+  if(!model) return;
+  let pred=await model.predict(srcimg);
+  let filtered=pred.filter(p=>p.probability>0.10).sort((a,b)=>b.probability-a.probability);
+  if(filtered.length==0 && pred.length>0){filtered=[pred.reduce((a,b)=>a.probability>b.probability?a:b)];}
+  let html='';
+  filtered.forEach(p=>{
+    const info=foodInfo[p.className]||{country:'-',calorie:'-',desc:'No info'};
+    html+=`<div class=\"food-card\">
+    <strong>${p.className}</strong> &nbsp; <b>${(p.probability*100).toFixed(1)}%</b><br>
+    Country: <b>${info.country}</b> &nbsp;|&nbsp; Calories: <b>${info.calorie} kcal</b><br>
+    <span style=\"color:#7b5509\">${info.desc}</span>
+    </div>`;
+  });
+  document.getElementById("output").innerHTML=html;
+}
+</script>
+</body>
+</html>
